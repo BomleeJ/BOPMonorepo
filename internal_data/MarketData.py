@@ -8,7 +8,7 @@ class MarketData:
 
     def __init__(self, question: str, clobTokens: list[str]):
         self.question = question
-        self.clobTokenIds = None
+        self.clobTokenIds = clobTokens
         self.YESMarketData = None
         self.NOMarketData = None
     
