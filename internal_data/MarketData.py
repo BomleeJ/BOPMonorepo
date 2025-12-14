@@ -6,9 +6,11 @@ class MarketData:
     YESMarketData: MarketState | None
     NOMarketData: MarketState | None
 
-    def __init__(self, question: str, clobTokens: list[str]):
+    def __init__(self, question: str, clobTokens: list[str], conditionID: str, marketId: str):
         self.question = question
         self.clobTokenIds = clobTokens
+        self.conditionID = conditionId 
+        self.marketID = marketId
         self.YESMarketData = None
         self.NOMarketData = None
     
