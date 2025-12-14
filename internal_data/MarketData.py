@@ -1,0 +1,36 @@
+from dataclass import dataclass
+
+class MarketData:
+    question: str | None
+    clobTokenIds: list[str] | None
+    YESMarketData: MarketState | None
+    NOMarketData: MarketState | None
+
+    def __init__(self, question: str, clobTokens: list[str]):
+        self.question = question
+        self.clobTokenIds = None
+        self.YESMarketData = None
+        self.NOMarketData = None
+    
+    def getYESPrice():
+        """
+        Fetches most recently stored price for the "Yes" side
+        """
+
+     def getYESDepth():
+        """
+        Fetches most recently stored price for the "Yes" side
+        """
+
+    def getNODepth():
+        pass
+
+
+
+@dataclass
+class MarketState:
+    bestAskPrice : float
+    bestAskDepth : float
+    bestAskVolume : float
+    
+
