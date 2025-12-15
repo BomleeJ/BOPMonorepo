@@ -34,20 +34,22 @@ class ArbGroupFactory():
         for m in self.marketData:
             groupTitle = m.get("groupItemTitle")
             if groupTitle in groupItemTitles:
-                markets.append(createMarketDataObject(m))
-                groupItemTitles.remove(title)
+                markets.append(self.createMarketDataObject(m))
+                groupItemTitles.remove(groupTitle)
 
-        if groupItemTiles:
+        if groupItemTitles:
             print(f"WARNING: NOT ALL MARKETS REPRESENTED for {self.polymarketData.get("title")} MISSING DATA FOR ")
 
-            for t in groupItemTiles:
+            for t in groupItemTitles:
                 print(f"{t}", end=" ")
 
+        return markets
             
         
-
-    def createMarketDataObject(self):
-        individualMarketData = self.marketData[0]
+    def createMarketDataObject(self, individualMarketData = None):
+        if not individualMarketData:
+            individualMarketData = self.marketData[0]
+            
         question = individualMarketData.get("question")
         marketID = individualMarketData.get("id")
         groupTitle = individualMarketData.get("groupItemTitle")
@@ -95,17 +97,20 @@ class ArbGroup:
         factory2 = ArbGroupFactory(eventURL2)
 
 
-        self.eventTitles = [factory1.get("title"), factory1.get("title")] # str
+        self.eventTitles = [factory1.get("title"), factory2.get("title")] # str
         self.marketGroup1 = factory1.getMarketDataWrapper(groupItemTitles1)
         self.marketGroup2 = factory2.getMarketDataWrapper(groupItemTitles2)
     
-    def __repr__:
-        print(f"Titles {self.eventTitles}")
+    def __repr__(self):
+        """Return a string representation of ArbGroup"""
+        market_count_1 = len(self.marketGroup1) if isinstance(self.marketGroup1, list) else 1 if self.marketGroup1 else 0
+        market_count_2 = len(self.marketGroup2) if isinstance(self.marketGroup2, list) else 1 if self.marketGroup2 else 0
         
-
+        return (f"ArbGroup(eventTitles={self.eventTitles}, "
+                f"marketGroup1_count={market_count_1}, marketGroup2_count={market_count_2}, "
+                f"eventURLs={self.eventURLs})")
         
     
-if __name__ == '__main__':
-    a = ArbGroup("https://polymarket.com/event/will-draftkings-launch-a-prediction-market-in-2025?tid=1765745562883", "https://polymarket.com/event/democratic-presidential-nominee-2028", None, None)
-    print(repr(a))
+    
+
 
