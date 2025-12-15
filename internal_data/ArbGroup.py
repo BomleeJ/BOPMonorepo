@@ -1,5 +1,5 @@
 from urllib.parse import urlparse
-from MarketData import MarketData
+from internal_data.MarketData import MarketData
 import httpx
 import json
 
@@ -27,7 +27,7 @@ class ArbGroupFactory():
     def getMarketDataWrapper(self, itemTitles):
         if itemTitles:
             return self.createMarketDataObjects(itemTitles)
-        return self.createMarketDataObject()
+        return [self.createMarketDataObject()]
 
     def createMarketDataObjects(self, groupItemTitles: str):
         markets = []
@@ -109,7 +109,48 @@ class ArbGroup:
         return (f"ArbGroup(eventTitles={self.eventTitles}, "
                 f"marketGroup1_count={market_count_1}, marketGroup2_count={market_count_2}, "
                 f"eventURLs={self.eventURLs})")
+
+    def getTotalM1YesPrice(self):
+        price = 0.0
+        for market in self.marketGroup1:
+            price += market.getYESPrice()
+        return price
+    
+    def getTotalM2YesPrice(self):
+        price = 0.0
+        for market in self.marketGroup2:
+            price += market.getYESPrice()
+        return price
+
+    def getTotalM2YESPrice(self):
+        price = 0.0
+        for market in self.marketGroup2:
+            price += market.getNOPrice()
+        return price
+    
+    def getTotalM2NoPrice(self):
+        price = 0.0
+        for market in self.marketGroup2:
+            price += market.getNOPrice()
+        return price
+
+    def hasArb(self):
+        return (
+            self.getTotalM1YesPrice() + 
+            self.getTotalM2NoPrice() < 1.0 
+        or 
+            self.getTotalM1NOPrice() + 
+            self.getTotalM2YESPrice() < 1.0
+        )
         
+        
+
+
+
+        
+    def __iter__(self):
+        yield from self.marketGroup1
+        yield from self.marketGroup2
     
     
 
