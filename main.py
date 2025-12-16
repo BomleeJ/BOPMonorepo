@@ -2,6 +2,9 @@ import httpx
 import pprint
 from internal_data.ArbGroup import ArbGroup
 from internal_data.MarketData import MarketData
+from py_clob_client.client import ClobClient, BookParams
+import time
+import asyncio
 import csv
 
 def read_csv(csv_name: str) -> list[ArbGroup]:
@@ -25,12 +28,80 @@ def read_csv(csv_name: str) -> list[ArbGroup]:
                 groupItemTitles2 = None
             a = ArbGroup(eventURL1, eventURL2, groupItemTitles1, groupItemTitles2)
             arbGroups.append(a)
-            print(a)
     
     return arbGroups
 
+"""
+Fetch OrderBookSummary (for each token id)
+
+"""
+
+def main():
+    csv = "din2.csv"
+    ArbGroups = read_csv(csv)
+
+    YesMarketCLOBIds = []
+    NoMarketClobIds = [] 
+
+    conditionID_to_marketMap = {}
+
+    for ArbGroup in ArbGroups:
+        for market in ArbGroup:
+            yesClobId = market.clobTokenIds[0]
+            noClobId = market.clobTokenIds[1]
+            conditionID_to_marketMap[market.conditionId] = market
+            YesMarketCLOBIds.append(BookParams(token_id=yesClobId))
+            NoMarketClobIds.append(BookParams(token_id=noClobId))
+    
+    client = ClobClient(
+        host="https://clob.polymarket.com",
+        chain_id=137
+    )
+    count = 0
+    while True:
+        print("Fetching Data...")
+        YesOrderBooks = client.get_order_books(YesMarketCLOBIds)
+        NoOrderBooks = client.get_order_books(NoMarketClobIds)
+        
+        
+        for orderbook in YesOrderBooks:
+            conditionID = orderbook.market
+            bestAskSummary = min(orderbook.asks, key=lambda x : x.price)
+            price, depth = bestAskSummary.price, bestAskSummary.size
+            
+            market = conditionID_to_marketMap[conditionID]
+            market.setYesMarketData(price, depth)
+        
+        for orderbook in NoOrderBooks:
+            conditionID = orderbook.market
+            bestAskSummary = min(orderbook.asks, key=lambda x : x.price)
+            
+            price, depth = bestAskSummary.price, bestAskSummary.size
+            
+            market = conditionID_to_marketMap[conditionID]
+            market.setNoMarketData(price, depth)
+
+        for arbGroup in ArbGroups:
+            if arbGroup.hasArb():
+                print("ARB")
+            else:
+                print("NO ARB")
+
+        count += 1
+        time.sleep(1)
+        if count == 1:
+            break
+
+
+
+
+
+    
+
+    
+
 if __name__ == '__main__':
-    read_csv("din.csv")
+    main()
 
 
 """
@@ -38,13 +109,6 @@ if __name__ == '__main__':
 from py_clob_client.client import ClobClient
 import asyncio
 
-client = ClobClient(
-    host="https://clob.polymarket.com",
-    chain_id=137
-)
-
-markets = client.get_market("0xf723d076576a434c0b92914608ab73ba9c56b2197f5bd9476ccd48a2c6dee12b")
 
 pprint.pprint(markets)
-
 """
