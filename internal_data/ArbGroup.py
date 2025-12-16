@@ -122,9 +122,9 @@ class ArbGroup:
             price += market.getYESPrice()
         return price
 
-    def getTotalM2YESPrice(self):
+    def getTotalM1NoPrice(self):
         price = 0.0
-        for market in self.marketGroup2:
+        for market in self.marketGroup1:
             price += market.getNOPrice()
         return price
     
@@ -135,12 +135,19 @@ class ArbGroup:
         return price
 
     def hasArb(self):
+        #print(self.eventURLs)
+        #print(self.getTotalM1YesPrice())
+        #print(self.getTotalM2NoPrice())
+
+        #print(self.getTotalM1NoPrice())
+        #print(self.getTotalM2YesPrice())
+
         return (
             self.getTotalM1YesPrice() + 
             self.getTotalM2NoPrice() < 1.0 
         or 
-            self.getTotalM1NOPrice() + 
-            self.getTotalM2YESPrice() < 1.0
+            self.getTotalM1NoPrice() + 
+            self.getTotalM2YesPrice() < 1.0
         )
         
         
