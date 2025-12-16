@@ -5,7 +5,6 @@ from dataclasses import dataclass
 class MarketState:
     bestAskPrice : float
     bestAskDepth : float
-    bestAskVolume : float
 
 class MarketData:
     question: str | None
@@ -21,24 +20,44 @@ class MarketData:
         self.clobTokenIds = clobTokens
         self.groupItemTitle = groupItemTitle
         self.conditionId = conditionID 
-        self.YESMarketData = None
-        self.NOMarketData = None
+        self.YESMarketData = MarketState(0.0, 0.0)
+        self.NOMarketData = MarketState(0.0, 0.0)
     
-    def getYESPrice():
+    def setYesMarketData(self, price: float, depth: float):
+        self.YESMarketData.bestAskPrice = float(price)
+        self.YESMarketData.bestAskDepth = float(depth)
+        
+    
+    def setNoMarketData(self, price: float, depth: float):
+        self.NOMarketData.bestAskPrice = float(price)
+        self.NOMarketData.bestAskDepth = float(depth)
+
+
+    def getYESPrice(self):
         """
         Fetches most recently stored price for the "Yes" side
         """
+        return self.YESMarketData.bestAskPrice
 
-    def getYESDepth():
+    def getYESDepth(self):
         """
         Fetches most recently stored price for the "Yes" side
         """
-        pass
+        return self.YESMarketData.bestAskDepth
 
-    def getNODepth():
-        pass
+    def getNOPrice(self):
+        return self.NOMarketData.bestAskPrice
+    
+    def getNODepth(self):
+        return self.NOMarketData.bestAskDepth
 
-
+    def __repr__(self):
+        """Return a string representation of MarketData"""
+        clob_ids_str = str(self.clobTokenIds) if self.clobTokenIds else "None"
+        question_short = (self.question[:50] + "...") if self.question and len(self.question) > 50 else self.question
+        return (f"MarketData(question='{question_short}', marketId='{self.marketID}', "
+                f"groupItemTitle='{self.groupItemTitle}', conditionId='{self.conditionId}', "
+                f"clobTokenIds={clob_ids_str})")
 
     
 
