@@ -1,13 +1,14 @@
 import httpx
-import pprint
 from internal_data.ArbGroup import ArbGroup
 from internal_data.MarketData import MarketData
+from data_output.emailsend import send_email
 from py_clob_client.client import ClobClient, BookParams
 import time
 import asyncio
 import csv
 from dotenv import load_dotenv
 import os
+import json
 
 def read_csv(csv_name: str) -> list[ArbGroup]:
     arbGroups = []
@@ -33,15 +34,22 @@ def read_csv(csv_name: str) -> list[ArbGroup]:
     
     return arbGroups
 
-"""
-Fetch OrderBookSummary (for each token id)
-
-"""
+def load_settings():
+    with open("setting.json") as f:
+        settings = json.load(f)
+    return settings
 
 def main():
     csv = "din2.csv"
     ArbGroups = read_csv(csv)
+    settings = load_settings()
 
+    TIMER_THRES = settings.get("cooldown_seconds")
+    ArbThres = settings.get("threshold")
+    fetch_frequency = settings.get("fetch_frequency")
+    emails = settings.get("emails")
+
+    
     YesMarketCLOBIds = []
     NoMarketClobIds = [] 
 
@@ -60,6 +68,10 @@ def main():
         chain_id=137
     )
     count = 0
+    seen = set()
+
+    last_sent = time.monotonic()
+
     while True:
         print("Fetching Data...")
         YesOrderBooks = client.get_order_books(YesMarketCLOBIds)
@@ -84,37 +96,21 @@ def main():
             market.setNoMarketData(price, depth)
 
         for arbGroup in ArbGroups:
-            if arbGroup.hasArb():
-                print("ARB")
-            else:
-                print("NO ARB")
+            if arbGroup.hasArb(ArbThres) and arbGroup not in seen:
+                email_body = arbGroup.getArbStr()
+                for email in emails:
+                    send_email(email_body, email)
 
-        count += 1
-        time.sleep(1)
-        if count == 1:
-            break
+        
+        time.sleep(fetch_frequency)
 
-
-
-
-
-    
+        if time.monotonic() - last_sent > TIMER_THRES:
+            seen = set()
+        
+        break
 
     
 
 if __name__ == '__main__':
-    # main()
-    load_dotenv()
-    a = os.environ.get("TESSPASS")
-    print(a)
-
-
-
-"""
-
-from py_clob_client.client import ClobClient
-import asyncio
-
-
-pprint.pprint(markets)
-"""
+    main()
+    

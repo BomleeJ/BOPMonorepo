@@ -1,0 +1,8 @@
+{
+    "emails": [
+      "omarjingo60@gmail.com"
+    ],
+    "threshold": 0.95,
+    "cooldown_seconds": 300,
+    "fetch_frequency": 30
+  }
