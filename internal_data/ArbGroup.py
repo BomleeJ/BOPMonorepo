@@ -134,26 +134,73 @@ class ArbGroup:
             price += market.getNOPrice()
         return price
 
-    def hasArb(self):
-        #print(self.eventURLs)
-        #print(self.getTotalM1YesPrice())
-        #print(self.getTotalM2NoPrice())
-
-        #print(self.getTotalM1NoPrice())
-        #print(self.getTotalM2YesPrice())
-
+    def hasArb(self, thres=1.0):
         return (
             self.getTotalM1YesPrice() + 
-            self.getTotalM2NoPrice() < 1.0 
+            self.getTotalM2NoPrice() < min(1.0, thres)
         or 
             self.getTotalM1NoPrice() + 
-            self.getTotalM2YesPrice() < 1.0
+            self.getTotalM2YesPrice() < min(1.0, thres)
         )
+
+    def getArbStr(self, thres=1.0):
+        lines = []
+        cap = min(1.0, thres)
+
+        # Case 1: YES (M1) + NO (M2)
+        total_yn = self.getTotalM1YesPrice() + self.getTotalM2NoPrice()
+        if total_yn < cap:
+            lines.append("🚨 ARBITRAGE FOUND 🚨")
+            lines.append(f"URLS M1: {self.eventURLs[0]} M2: {self.eventURLs[1]}")
+            lines.append(f"Strategy: YES on MarketGroup1 + NO on MarketGroup2")
+            lines.append(f"Total cost: {total_yn:.4f} < {cap}")
+            try:
+                percent_return = (1.0 / total_yn - 1.0) * 100
+            except:
+                percent_return = "Unknown"
+            lines.append(f"Percent Return: {percent_return:.2f}%")
+            lines.append("")
+
+            lines.append("MarketGroup1 — YES positions:")
+            for m in self.marketGroup1:
+                lines.append("  " + m.getYESStr().strip())
+
+            lines.append("")
+            lines.append("MarketGroup2 — NO positions:")
+            for m in self.marketGroup2:
+                lines.append("  " + m.getNOStr().strip())
+
+        # Case 2: NO (M1) + YES (M2)
+        total_ny = self.getTotalM1NoPrice() + self.getTotalM2YesPrice()
+        if total_ny < cap:
+            if lines:
+                lines.append("\n" + "-" * 40 + "\n")
+
+            lines.append("🚨 ARBITRAGE FOUND 🚨")
+            lines.append(f"URLS M1: {self.eventURLs[0]} M2: {self.eventURLs[1]}")
+            lines.append(f"Strategy: NO on MarketGroup1 + YES on MarketGroup2")
+            lines.append(f"Total cost: {total_ny:.4f} < {cap}")
+            try:
+                percent_return = (1.0 / total_ny - 1.0) * 100
+            except:
+                percent_return = "Unknown"
+            lines.append(f"Percent Return: {percent_return:.2f}%")
+            lines.append("")
+
+            lines.append("MarketGroup1 — NO positions:")
+            for m in self.marketGroup1:
+                lines.append("  " + m.getNOStr().strip())
+
+            lines.append("")
+            lines.append("MarketGroup2 — YES positions:")
+            for m in self.marketGroup2:
+                lines.append("  " + m.getYESStr().strip())
+
+        if not lines:
+            return ""
+
+        return "\n".join(lines)
         
-        
-
-
-
         
     def __iter__(self):
         yield from self.marketGroup1

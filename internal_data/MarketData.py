@@ -32,6 +32,11 @@ class MarketData:
         self.NOMarketData.bestAskPrice = float(price)
         self.NOMarketData.bestAskDepth = float(depth)
 
+    def getYESStr(self):
+        return f"YES ON {self.question} | PRICE {self.getYESPrice()}\n"
+    
+    def getNOStr(self):
+        return f"NO ON {self.question} | PRICE {self.getNOPrice()}\n"
 
     def getYESPrice(self):
         """

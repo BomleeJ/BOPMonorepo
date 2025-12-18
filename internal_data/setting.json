@@ -1,8 +1,0 @@
-{
-    "emails": [
-      "alerts@company.com",
-      "trading@company.com"
-    ],
-    "threshold": 0.99,
-    "cooldown_seconds": 300
-  }
