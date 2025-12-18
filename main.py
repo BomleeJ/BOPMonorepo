@@ -6,6 +6,8 @@ from py_clob_client.client import ClobClient, BookParams
 import time
 import asyncio
 import csv
+from dotenv import load_dotenv
+import os
 
 def read_csv(csv_name: str) -> list[ArbGroup]:
     arbGroups = []
@@ -101,7 +103,11 @@ def main():
     
 
 if __name__ == '__main__':
-    main()
+    # main()
+    load_dotenv()
+    a = os.environ.get("TESSPASS")
+    print(a)
+
 
 
 """
