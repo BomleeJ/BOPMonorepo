@@ -40,7 +40,7 @@ def load_settings():
     return settings
 
 def main():
-    csv = "din2.csv"
+    csv = "din.csv"
     ArbGroups = read_csv(csv)
     settings = load_settings()
 
@@ -107,7 +107,6 @@ def main():
         if time.monotonic() - last_sent > TIMER_THRES:
             seen = set()
         
-        break
 
     
 
